@@ -26,24 +26,32 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Timer _timer;
-  var _time;
+  var _minutes = 0;
+  bool running = false;
 
-  _startTimer(int timeInMinutes) {
+  _timerRunner(int timeInMinutes) async {
     var tid = timeInMinutes * 60;
     const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
-      oneSec,
-      (Timer timer) => setState(
-        () {
-          if (tid < 1) {
-            timer.cancel();
-          } else {
-            _time = tid;
-            tid = tid - 1;
-          }
-        },
-      ),
-    );
+    setState(() {
+      running = !running;
+    });
+    if (running) {
+      _timer = new Timer.periodic(
+        oneSec,
+        (Timer timer) => setState(
+          () {
+            if (tid < 1) {
+              timer.cancel();
+            } else {
+              _minutes = (tid / 60).floor();
+              tid = tid - 1;
+            }
+          },
+        ),
+      );
+    } else {
+      _timer.cancel();
+    }
   }
 
   @override
@@ -62,7 +70,6 @@ class _MyHomePageState extends State<MyHomePage> {
         currentPageValue = controller.page;
       });
     });
-    var _timeInMinutes = _time;
     return Scaffold(
       backgroundColor: Color.fromRGBO(117, 112, 237, 1),
       appBar: _buildAppBar(),
@@ -147,9 +154,9 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  '14:01',
+                  ('${_minutes.toString()} minutes left'),
                   style: TextStyle(
-                      fontSize: 50,
+                      fontSize: 30,
                       color: Colors.white,
                       fontFamily: "Montserrat",
                       letterSpacing: 1.5,
@@ -191,17 +198,27 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 FloatingActionButton.extended(
-                  icon: Icon(Icons.play_circle_outline),
-                  label: Text(
-                    "Play",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1.5,
-                        fontSize: 18),
-                  ),
+                  icon: running
+                      ? Icon(Icons.stop)
+                      : Icon(Icons.play_circle_outline),
+                  label: running
+                      ? Text(
+                          "Stop",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 1.5,
+                              fontSize: 18),
+                        )
+                      : Text(
+                          "Start",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 1.5,
+                              fontSize: 18),
+                        ),
                   foregroundColor: Color.fromRGBO(209, 207, 235, 1),
                   backgroundColor: Color.fromRGBO(100, 95, 219, 1),
-                  onPressed: () => (print('object')),
+                  onPressed: () => (_timerRunner(25)),
                   elevation: 3,
                   hoverElevation: 3,
                 ),
