@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:dots_indicator/dots_indicator.dart';
-import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -28,12 +27,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Timer timer;
   Stopwatch _watch = new Stopwatch();
-
-  String _elapsedTime = '';
+  Timer counterTimer;
+  String _elapsedTime = '00:00';
+  int _todayCounter;
+  int _sessionCounter = 0;
 
   @override
   void dispose() {
     _watch.stop();
+    timer.cancel();
     super.dispose();
   }
 
@@ -121,7 +123,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Container _buildTimerView() {
-    bool running = _watch.isRunning;
     return Container(
       child: Column(
         mainAxisSize: MainAxisSize.max,
@@ -145,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.transparent,
                 ),
                 Text(
-                  '0/4',
+                  '$_sessionCounter/4',
                   style: TextStyle(
                     fontSize: 20,
                     color: Color.fromRGBO(229, 227, 255, 1),
@@ -199,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   foregroundColor: Color.fromRGBO(209, 207, 235, 1),
                   backgroundColor: Color.fromRGBO(100, 95, 219, 1),
                   onPressed: () => (checkTimerState()),
-                  elevation: 3,
+                  elevation: 0,
                   hoverElevation: 3,
                 ),
               ],
@@ -229,13 +230,29 @@ class _MyHomePageState extends State<MyHomePage> {
       setTime();
     } else if (!_watch.isRunning && _watch.elapsedMilliseconds > 0) {
       _watch.reset();
+      timer.cancel();
+      counterTimer.cancel();
       setTime();
     } else {
       _watch.start();
       timer = new Timer.periodic(
-        Duration(milliseconds: 500),
+        Duration(seconds: 1),
         updateTime,
       );
+      counterTimer = new Timer.periodic(Duration(seconds: 6), addToCounters);
+    }
+  }
+
+  addToCounters(Timer timer) {
+    if (_watch.isRunning) {
+      setState(() {
+        _sessionCounter += 1;
+      });
+      timer.cancel();
+      _watch.stop();
+      _watch.reset();
+      setTime();
+      checkTimerState();
     }
   }
 
