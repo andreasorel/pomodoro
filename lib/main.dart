@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -25,38 +26,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Timer _timer;
-  var _minutes = 0;
-  bool running = false;
+  Timer timer;
+  Stopwatch _watch = new Stopwatch();
 
-  _timerRunner(int timeInMinutes) async {
-    var tid = timeInMinutes * 60;
-    const oneSec = const Duration(seconds: 1);
-    setState(() {
-      running = !running;
-    });
-    if (running) {
-      _timer = new Timer.periodic(
-        oneSec,
-        (Timer timer) => setState(
-          () {
-            if (tid < 1) {
-              timer.cancel();
-            } else {
-              _minutes = (tid / 60).floor();
-              tid = tid - 1;
-            }
-          },
-        ),
-      );
-    } else {
-      _timer.cancel();
-    }
-  }
+  String _elapsedTime = '';
 
   @override
   void dispose() {
-    _timer.cancel();
+    _watch.stop();
     super.dispose();
   }
 
@@ -144,6 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Container _buildTimerView() {
+    bool running = _watch.isRunning;
     return Container(
       child: Column(
         mainAxisSize: MainAxisSize.max,
@@ -154,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  ('${_minutes.toString()} minutes left'),
+                  ('$_elapsedTime'),
                   style: TextStyle(
                       fontSize: 30,
                       color: Colors.white,
@@ -167,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.transparent,
                 ),
                 Text(
-                  '3/4',
+                  '0/4',
                   style: TextStyle(
                     fontSize: 20,
                     color: Color.fromRGBO(229, 227, 255, 1),
@@ -181,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.transparent,
                 ),
                 Text(
-                  '6 today',
+                  '0 today',
                   style: TextStyle(
                       fontSize: 20,
                       color: Color.fromRGBO(229, 227, 255, 1),
@@ -218,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                   foregroundColor: Color.fromRGBO(209, 207, 235, 1),
                   backgroundColor: Color.fromRGBO(100, 95, 219, 1),
-                  onPressed: () => (_timerRunner(25)),
+                  onPressed: () => (checkTimerState()),
                   elevation: 3,
                   hoverElevation: 3,
                 ),
@@ -241,5 +219,45 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
+  }
+
+  checkTimerState() {
+    if (_watch.isRunning) {
+      _watch.stop();
+      setTime();
+    } else if (!_watch.isRunning && _watch.elapsedMilliseconds > 0) {
+      _watch.reset();
+      setTime();
+    } else {
+      _watch.start();
+      timer = new Timer.periodic(
+        Duration(milliseconds: 500),
+        updateTime,
+      );
+    }
+  }
+
+  updateTime(Timer timer) {
+    if (_watch.isRunning) {
+      setState(() {
+        _elapsedTime = transformMilliseconds(_watch.elapsedMilliseconds);
+      });
+    }
+  }
+
+  setTime() {
+    var currentTime = _watch.elapsedMilliseconds;
+    setState(() {
+      _elapsedTime = transformMilliseconds(currentTime);
+    });
+  }
+
+  transformMilliseconds(int milliseconds) {
+    int hundreds = (milliseconds / 10).truncate();
+    int seconds = (hundreds / 100).truncate();
+    int minutes = (seconds / 60).truncate();
+    String minutesStr = (minutes % 60).toString().padLeft(2, '0');
+    String secondsStr = (seconds % 60).toString().padLeft(2, '0');
+    return '$minutesStr:$secondsStr';
   }
 }
