@@ -176,10 +176,12 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 FloatingActionButton.extended(
-                  icon: running
+                  icon: _watch.isRunning
                       ? Icon(Icons.stop)
-                      : Icon(Icons.play_circle_outline),
-                  label: running
+                      : Icon(_watch.elapsedMilliseconds > 0
+                          ? Icons.refresh
+                          : Icons.play_circle_outline),
+                  label: _watch.isRunning
                       ? Text(
                           "Stop",
                           style: TextStyle(
@@ -188,7 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               fontSize: 18),
                         )
                       : Text(
-                          "Start",
+                          _watch.elapsedMilliseconds > 0 ? "Reset" : "Start",
                           style: TextStyle(
                               fontWeight: FontWeight.w500,
                               letterSpacing: 1.5,
