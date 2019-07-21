@@ -204,6 +204,36 @@ class _MyHomePageState extends State<MyHomePage> {
                   elevation: 0,
                   hoverElevation: 3,
                 ),
+                Container(
+                  height: 50,
+                  width: 100,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25.0),
+                      gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color.fromRGBO(125, 118, 255, 1),
+                            Color.fromRGBO(75, 255, 241, 1)
+                          ])),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(25.0),
+                      onTap: () => (print('object')),
+                      child: Center(
+                        child: Text(
+                          'Start',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
               ],
             ),
           ),
@@ -240,14 +270,21 @@ class _MyHomePageState extends State<MyHomePage> {
         Duration(seconds: 1),
         updateTime,
       );
-      counterTimer = new Timer.periodic(Duration(seconds: 6), addToCounters);
+      counterTimer = new Timer.periodic(
+        Duration(minutes: 25),
+        addToCounters,
+      );
     }
   }
 
+  playTomatoSound() {
+/*TODO: make sound and make it soundy */
+  }
   addToCounters(Timer timer) {
     if (_watch.isRunning) {
       setState(() {
         _todayCounter += 1;
+        playTomatoSound();
       });
       timer.cancel();
       _watch.stop();
