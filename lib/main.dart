@@ -29,8 +29,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Stopwatch _watch = new Stopwatch();
   Timer counterTimer;
   String _elapsedTime = '00:00';
-  int _todayCounter;
+  int _todayCounter = 0;
   int _sessionCounter = 0;
+  int _sessionTotal = 4;
 
   @override
   void dispose() {
@@ -146,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.transparent,
                 ),
                 Text(
-                  '$_sessionCounter/4',
+                  '$_sessionCounter/$_sessionTotal',
                   style: TextStyle(
                     fontSize: 20,
                     color: Color.fromRGBO(229, 227, 255, 1),
@@ -160,7 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.transparent,
                 ),
                 Text(
-                  '0 today',
+                  '$_todayCounter today',
                   style: TextStyle(
                       fontSize: 20,
                       color: Color.fromRGBO(229, 227, 255, 1),
@@ -246,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> {
   addToCounters(Timer timer) {
     if (_watch.isRunning) {
       setState(() {
-        _sessionCounter += 1;
+        _todayCounter += 1;
       });
       timer.cancel();
       _watch.stop();
